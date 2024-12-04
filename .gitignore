@@ -1,0 +1,6 @@
+# program
+*.out
+*.exe
+
+# inputs
+input.txt
