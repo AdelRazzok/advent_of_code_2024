@@ -5,10 +5,11 @@
 
 using namespace std;
 
-void    handle_file(ifstream &file, string &line) {
-    vector<int> list_one, list_two;
+void    handle_file(ifstream &file) {
+    string      line;
     size_t      pos;
-    int         result;
+    vector<int> list_one, list_two;
+    int         result = 0;
 
     while (getline(file, line)) {
         pos = line.find("   ");
@@ -31,17 +32,18 @@ void    handle_file(ifstream &file, string &line) {
 
 int     main(int argc, char **argv) {
     ifstream    file;
-    string      line;
 
     if (argc != 2) {
         cerr << "Usage: " << argv[0] << " <input_file>" << endl;
         return 1;
     }
+
     file.open(argv[1], ifstream::in);
     if (!file.is_open()) {
         cerr << "Error: cannot open file " << argv[1] << endl;
         return 1;
     }
-    handle_file(file, line);
+
+    handle_file(file);
     return 0;
 }
