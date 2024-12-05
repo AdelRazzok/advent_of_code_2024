@@ -2,46 +2,47 @@
 #include <fstream>
 #include <string>
 #include <regex>
+#include <sstream>
 
 using namespace std;
 
 int     get_line_result(const string &line) {
-    regex           main_pattern(R"(mul\((\d{1,3}),(\d{1,3})\))");
-    regex           state_pattern(R"(do\(\)|don't\(\))");
+    regex           main_pattern(R"(mul\((\d{1,3}),(\d{1,3})\)|do\(\)|don't\(\))");
+    regex           mul_pattern(R"(mul\((\d{1,3}),(\d{1,3})\))");
     sregex_iterator it(line.begin(), line.end(), main_pattern);
     sregex_iterator end;
+    smatch          main_match;
+    smatch          mul_match;
+    string          instruction;
     bool            is_calculating = true;
     int             sum = 0;
 
     while (it != end) {
-        smatch match = *it;
-        string instruction = match.str();
+        main_match = *it;
+        instruction = main_match.str();
 
         if (instruction == "do()") {
             is_calculating = true;
         } else if (instruction == "don't()") {
             is_calculating = false;
         } else {
-            smatch mul_match;
-            if (regex_match(instruction, mul_match, main_pattern)) {
-                int x = stoi(mul_match[1].str());
-                int y = stoi(mul_match[2].str());
-                if (is_calculating) {
-                    sum += x * y;
-                }
+            if (regex_match(instruction, mul_match, mul_pattern) && is_calculating) {
+                sum += stoi(mul_match[1].str()) * stoi(mul_match[2].str());
             }
         }
-        ++it;
+        it++;
     }
+    return sum;
 }
 
 void    handle_file(ifstream &file) {
-    string  line;
-    int     result = 0;
+    stringstream    buf;
+    string          line;
+    int             result;
 
-    while (getline(file, line)) {
-        result += get_line_result(line);
-    }
+    buf << file.rdbuf();
+    line = buf.str();
+    result = get_line_result(line);
     cout << "Result: " << result << endl;
 }
 
