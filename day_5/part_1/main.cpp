@@ -8,28 +8,28 @@
 
 using namespace std;
 
-auto loadData(ifstream &file) {
+auto load_data(ifstream &file) {
     vector<pair<int, int>>  rules;
     vector<vector<int>>     updates;
     string                  line;
-    bool                    readingRules = true;
+    bool                    reading_rules = true;
 
     while (getline(file, line)) {
         if (line.empty()) {
-            readingRules = false;
+            reading_rules = false;
             continue;
         }
 
-        if (readingRules) {
+        if (reading_rules) {
             size_t delimiter = line.find('|');
             int x = stoi(line.substr(0, delimiter));
             int y = stoi(line.substr(delimiter + 1));
             rules.emplace_back(x, y);
         } else {
             vector<int> update;
-            istringstream lineStream(line);
+            istringstream line_stream(line);
             string number;
-            while (getline(lineStream, number, ',')) {
+            while (getline(line_stream, number, ',')) {
                 update.push_back(stoi(number));
             }
             updates.push_back(update);
@@ -38,27 +38,28 @@ auto loadData(ifstream &file) {
     return make_tuple(rules, updates);
 }
 
-unordered_map<int, vector<int>> buildGraph(const vector<pair<int, int>> &rules) {
+unordered_map<int, vector<int>> build_graph(const vector<pair<int, int>> &rules) {
     unordered_map<int, vector<int>> graph;
+
     for (const pair<int, int> &rule : rules) {
         graph[rule.first].push_back(rule.second);
     }
     return graph;
 }
 
-bool isValidUpdate(const unordered_map<int, vector<int>> &graph, const vector<int> &update) {
-    unordered_map<int, int> indexMap;
+bool is_valid_update(const unordered_map<int, vector<int>> &graph, const vector<int> &update) {
+    unordered_map<int, int> index_map;
 
     for (size_t i = 0; i < update.size(); ++i) {
-        indexMap[update[i]] = i;
+        index_map[update[i]] = i;
     }
     for (const pair<int, vector<int>> &entry : graph) {
         int x = entry.first;
         const vector<int> &dependencies = entry.second;
 
-        if (indexMap.find(x) != indexMap.end()) {
+        if (index_map.find(x) != index_map.end()) {
             for (int dependency : dependencies) {
-                if (indexMap.find(dependency) != indexMap.end() && indexMap[x] > indexMap[dependency]) {
+                if (index_map.find(dependency) != index_map.end() && index_map[x] > index_map[dependency]) {
                     return false;
                 }
             }
@@ -67,31 +68,31 @@ bool isValidUpdate(const unordered_map<int, vector<int>> &graph, const vector<in
     return true;
 }
 
-int getMiddlePage(const vector<int> &update) {
+int get_middle_page(const vector<int> &update) {
     return update[update.size() / 2];
 }
 
-auto calculateResult(const vector<pair<int, int>> &rules, const vector<vector<int>> &updates) {
-    unordered_map<int, vector<int>> graph = buildGraph(rules);
-    vector<vector<int>>             validUpdates;
-    int                             sumMiddlePages = 0;
+auto calculate_result(const vector<pair<int, int>> &rules, const vector<vector<int>> &updates) {
+    unordered_map<int, vector<int>> graph = build_graph(rules);
+    vector<vector<int>>             valid_updates;
+    int                             sum_middle_pages = 0;
 
     for (const vector<int> &update : updates) {
-        if (isValidUpdate(graph, update)) {
-            validUpdates.push_back(update);
-            sumMiddlePages += getMiddlePage(update);
+        if (is_valid_update(graph, update)) {
+            valid_updates.push_back(update);
+            sum_middle_pages += get_middle_page(update);
         }
     }
-    return make_tuple(sumMiddlePages, validUpdates);
+    return make_tuple(sum_middle_pages, valid_updates);
 }
 
-void handleFile(ifstream &file) {
-    auto [rules, updates] = loadData(file);
-    auto [result, validUpdates] = calculateResult(rules, updates);
+void handle_file(ifstream &file) {
+    auto [rules, updates] = load_data(file);
+    auto [result, valid_updates] = calculate_result(rules, updates);
 
     cout << "Sum of middle pages: " << result << endl;
     cout << "Valid updates: " << endl;
-    for (const vector<int> &update : validUpdates) {
+    for (const vector<int> &update : valid_updates) {
         for (size_t i = 0; i < update.size(); ++i) {
             cout << update[i];
             if (i < update.size() - 1) cout << ",";
@@ -114,7 +115,7 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    handleFile(file);
+    handle_file(file);
     file.close();
 
     return 0;
